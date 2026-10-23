@@ -61,4 +61,42 @@ document.getElementById('requestForm').addEventListener('submit', (event) => {
   }
 
   result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+document.getElementById('requestForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const form = event.currentTarget;
+  if (!form.reportValidity()) return;
+
+  const data = new FormData(form);
+
+  const request = {
+    name: data.get('fullName'),
+    phone: data.get('phone'),
+    subject: data.get('topic') || data.get('requestType') || 'انتخاب نشده',
+    message: data.get('details') || 'بدون توضیح'
+  };
+
+  const result = document.getElementById('formResult');
+  result.hidden = false;
+  result.textContent = 'در حال ارسال درخواست...';
+
+  try {
+    await fetch('https://script.google.com/macros/s/AKfycbxxIhG5zPsxHkgY9NCLzzSOuD6Mju1fJe3Se_hJyQ4gqFZ1_kQwrq7rZdlQblo1AQMiVw/exec', {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify(request)
+    });
+
+    result.textContent = 'درخواست ارسال شد. اگر پیام در تلگرام دریافت نشد، تنظیمات اتصال را بررسی کن.';
+    form.reset();
+  } catch (error) {
+    result.textContent = 'ارسال درخواست انجام نشد. لطفاً اتصال اینترنت را بررسی کن و دوباره تلاش کن.';
+  }
+
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 });
+
